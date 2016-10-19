@@ -1,2 +1,3 @@
 rootProject.name = 'compilers'
+include 'PA2J'
 

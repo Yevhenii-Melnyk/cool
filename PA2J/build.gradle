@@ -1,0 +1,16 @@
+task CoolLexerExec(type: JavaExec) {
+    main = 'JLex.Main'
+    defaultCharacterEncoding = 'UTF-8'
+    classpath = files(file("../lib/jlex.jar"))
+    args 'src/main/resources/cool.lex'
+}
+
+task CoolLexerCopyClass(dependsOn: CoolLexerExec, type: Copy) {
+    from 'src/main/resources/cool.lex.java'
+    into "src/main/java/compilers/pa2j/"
+    rename('cool.lex.java', 'CoolLexer.java')
+}
+
+task CoolLexer(dependsOn: CoolLexerCopyClass, type: Delete) {
+    delete('src/main/resources/cool.lex.java')
+}

@@ -1,14 +1,23 @@
-group 'compilers'
-version '1.0-SNAPSHOT'
+allprojects {
+    group 'compilers'
+    version '1.0-SNAPSHOT'
 
-apply plugin: 'java'
+    apply plugin: 'java'
 
-sourceCompatibility = 1.8
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
-repositories {
-    mavenCentral()
-}
+    repositories {
+        flatDir {
+            dirs "$rootProject.projectDir/lib"
+        }
+        mavenCentral()
+    }
 
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
+    dependencies {
+        compile name: 'java-cup-11a'
+
+        testCompile "junit:junit:4.12"
+    }
+
 }
