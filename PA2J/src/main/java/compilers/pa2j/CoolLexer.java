@@ -1,9 +1,6 @@
-/*
- *  The scanner definition for COOL.
- */
 package compilers.pa2j;
-
 import java_cup.runtime.Symbol;
+import static compilers.pa2j.TokenConstants.*;
 
 
 class CoolLexer implements java_cup.runtime.Scanner {
@@ -17,30 +14,24 @@ class CoolLexer implements java_cup.runtime.Scanner {
 	private final int YY_BOL = 128;
 	private final int YY_EOF = 129;
 
-	/*  Stuff enclosed in %{ %} is copied verbatim to the lexer class
-	 *  definition, all the extra variables/functions you want to use in the
-	 *  lexer actions should go here.  Don't remove or modify anything that
-	 *  was there initially.  */
-	// Max size of string constants
-	static int MAX_STR_CONST = 1025;
-	// For assembling string constants
-	StringBuffer string_buf = new StringBuffer();
-	private int curr_lineno = 1;
-
-	int get_curr_lineno() {
-		return curr_lineno;
-	}
-
-	private AbstractSymbol filename;
-
-	void set_filename(String fname) {
-		filename = AbstractTable.stringtable.addString(fname);
-	}
-
-	AbstractSymbol curr_filename() {
-		return filename;
-	}
-
+    // Max size of string constants
+    static int MAX_STR_CONST = 1025;
+    // For assembling string constants
+    StringBuffer string_buf = new StringBuffer();
+    private int curr_lineno = 1;
+    int get_curr_lineno() {
+	    return curr_lineno;
+    }
+    private AbstractSymbol filename;
+    void set_filename(String fname) {
+	    filename = AbstractTable.stringtable.addString(fname);
+    }
+    AbstractSymbol curr_filename() {
+	    return filename;
+    }
+    AbstractSymbol addString(String str) {
+        return AbstractTable.stringtable.addString(str, MAX_STR_CONST);
+    }
 	private java.io.BufferedReader yy_reader;
 	private int yy_buffer_index;
 	private int yy_buffer_read;
@@ -50,23 +41,23 @@ class CoolLexer implements java_cup.runtime.Scanner {
 	private boolean yy_at_bol;
 	private int yy_lexical_state;
 
-	CoolLexer(java.io.Reader reader) {
-		this();
+	CoolLexer (java.io.Reader reader) {
+		this ();
 		if (null == reader) {
 			throw (new Error("Error: Bad input stream initializer."));
 		}
 		yy_reader = new java.io.BufferedReader(reader);
 	}
 
-	CoolLexer(java.io.InputStream instream) {
-		this();
+	CoolLexer (java.io.InputStream instream) {
+		this ();
 		if (null == instream) {
 			throw (new Error("Error: Bad input stream initializer."));
 		}
 		yy_reader = new java.io.BufferedReader(new java.io.InputStreamReader(instream));
 	}
 
-	private CoolLexer() {
+	private CoolLexer () {
 		yy_buffer = new char[YY_BUFFER_SIZE];
 		yy_buffer_read = 0;
 		yy_buffer_index = 0;
@@ -75,24 +66,22 @@ class CoolLexer implements java_cup.runtime.Scanner {
 		yy_at_bol = true;
 		yy_lexical_state = YYINITIAL;
 
-/*  Stuff enclosed in %init{ %init} is copied verbatim to the lexer
- *  class constructor, all the extra initialization you want to do should
- *  go here.  Don't remove or modify anything that was there initially. */
-		// empty for now
 	}
 
 	private boolean yy_eof_done = false;
 	private final int YYINITIAL = 0;
+	private final int COMMENT = 1;
+	private final int SINGLE_LINE_COMMENT = 2;
 	private final int yy_state_dtrans[] = {
-			0
+		0,
+		10,
+		13
 	};
-
-	private void yybegin(int state) {
+	private void yybegin (int state) {
 		yy_lexical_state = state;
 	}
-
-	private int yy_advance()
-			throws java.io.IOException {
+	private int yy_advance ()
+		throws java.io.IOException {
 		int next_read;
 		int i;
 		int j;
@@ -136,70 +125,59 @@ class CoolLexer implements java_cup.runtime.Scanner {
 		}
 		return yy_buffer[yy_buffer_index++];
 	}
-
-	private void yy_move_end() {
+	private void yy_move_end () {
 		if (yy_buffer_end > yy_buffer_start &&
-				'\n' == yy_buffer[yy_buffer_end - 1])
+		    '\n' == yy_buffer[yy_buffer_end-1])
 			yy_buffer_end--;
 		if (yy_buffer_end > yy_buffer_start &&
-				'\r' == yy_buffer[yy_buffer_end - 1])
+		    '\r' == yy_buffer[yy_buffer_end-1])
 			yy_buffer_end--;
 	}
-
-	private boolean yy_last_was_cr = false;
-
-	private void yy_mark_start() {
+	private boolean yy_last_was_cr=false;
+	private void yy_mark_start () {
 		yy_buffer_start = yy_buffer_index;
 	}
-
-	private void yy_mark_end() {
+	private void yy_mark_end () {
 		yy_buffer_end = yy_buffer_index;
 	}
-
-	private void yy_to_mark() {
+	private void yy_to_mark () {
 		yy_buffer_index = yy_buffer_end;
 		yy_at_bol = (yy_buffer_end > yy_buffer_start) &&
-				('\r' == yy_buffer[yy_buffer_end - 1] ||
-						'\n' == yy_buffer[yy_buffer_end - 1] ||
-						2028/*LS*/ == yy_buffer[yy_buffer_end - 1] ||
-						2029/*PS*/ == yy_buffer[yy_buffer_end - 1]);
+		            ('\r' == yy_buffer[yy_buffer_end-1] ||
+		             '\n' == yy_buffer[yy_buffer_end-1] ||
+		             2028/*LS*/ == yy_buffer[yy_buffer_end-1] ||
+		             2029/*PS*/ == yy_buffer[yy_buffer_end-1]);
 	}
-
-	private java.lang.String yytext() {
+	private java.lang.String yytext () {
 		return (new java.lang.String(yy_buffer,
-				yy_buffer_start,
-				yy_buffer_end - yy_buffer_start));
+			yy_buffer_start,
+			yy_buffer_end - yy_buffer_start));
 	}
-
-	private int yylength() {
+	private int yylength () {
 		return yy_buffer_end - yy_buffer_start;
 	}
-
-	private char[] yy_double(char buf[]) {
+	private char[] yy_double (char buf[]) {
 		int i;
 		char newbuf[];
-		newbuf = new char[2 * buf.length];
+		newbuf = new char[2*buf.length];
 		for (i = 0; i < buf.length; ++i) {
 			newbuf[i] = buf[i];
 		}
 		return newbuf;
 	}
-
 	private final int YY_E_INTERNAL = 0;
 	private final int YY_E_MATCH = 1;
 	private java.lang.String yy_error_string[] = {
-			"Error: Internal error.\n",
-			"Error: Unmatched input.\n"
+		"Error: Internal error.\n",
+		"Error: Unmatched input.\n"
 	};
-
-	private void yy_error(int code, boolean fatal) {
+	private void yy_error (int code,boolean fatal) {
 		java.lang.System.out.print(yy_error_string[code]);
 		java.lang.System.out.flush();
 		if (fatal) {
 			throw new Error("Fatal Error.\n");
 		}
 	}
-
 	private int[][] unpackFromString(int size1, int size2, String st) {
 		int colonIndex = -1;
 		String lengthString;
@@ -210,52 +188,63 @@ class CoolLexer implements java_cup.runtime.Scanner {
 		String workString;
 
 		int res[][] = new int[size1][size2];
-		for (int i = 0; i < size1; i++) {
-			for (int j = 0; j < size2; j++) {
+		for (int i= 0; i < size1; i++) {
+			for (int j= 0; j < size2; j++) {
 				if (sequenceLength != 0) {
 					res[i][j] = sequenceInteger;
 					sequenceLength--;
 					continue;
 				}
 				commaIndex = st.indexOf(',');
-				workString = (commaIndex == -1) ? st :
-						st.substring(0, commaIndex);
-				st = st.substring(commaIndex + 1);
+				workString = (commaIndex==-1) ? st :
+					st.substring(0, commaIndex);
+				st = st.substring(commaIndex+1);
 				colonIndex = workString.indexOf(':');
 				if (colonIndex == -1) {
-					res[i][j] = Integer.parseInt(workString);
+					res[i][j]=Integer.parseInt(workString);
 					continue;
 				}
 				lengthString =
-						workString.substring(colonIndex + 1);
-				sequenceLength = Integer.parseInt(lengthString);
-				workString = workString.substring(0, colonIndex);
-				sequenceInteger = Integer.parseInt(workString);
+					workString.substring(colonIndex+1);
+				sequenceLength=Integer.parseInt(lengthString);
+				workString=workString.substring(0,colonIndex);
+				sequenceInteger=Integer.parseInt(workString);
 				res[i][j] = sequenceInteger;
 				sequenceLength--;
 			}
 		}
 		return res;
 	}
-
 	private int yy_acpt[] = {
 		/* 0 */ YY_NOT_ACCEPT,
 		/* 1 */ YY_NO_ANCHOR,
 		/* 2 */ YY_NO_ANCHOR,
 		/* 3 */ YY_NO_ANCHOR,
-		/* 4 */ YY_NO_ANCHOR
+		/* 4 */ YY_NO_ANCHOR,
+		/* 5 */ YY_NO_ANCHOR,
+		/* 6 */ YY_NO_ANCHOR,
+		/* 7 */ YY_NO_ANCHOR,
+		/* 8 */ YY_NO_ANCHOR,
+		/* 9 */ YY_NO_ANCHOR,
+		/* 10 */ YY_NOT_ACCEPT,
+		/* 11 */ YY_NO_ANCHOR,
+		/* 12 */ YY_NO_ANCHOR,
+		/* 13 */ YY_NOT_ACCEPT,
+		/* 14 */ YY_NO_ANCHOR,
+		/* 15 */ YY_NO_ANCHOR
 	};
-	private int yy_cmap[] = unpackFromString(1, 130,
-			"3:10,0,3:2,0,3:47,1,2,3:65,4:2")[0];
+	private int yy_cmap[] = unpackFromString(1,130,
+"6:10,5,6:2,0,6:26,1,3,2,6:2,4,6:82,7:2")[0];
 
-	private int yy_rmap[] = unpackFromString(1, 5,
-			"0,1,2:3")[0];
+	private int yy_rmap[] = unpackFromString(1,16,
+"0,1,2:8,3,4,5,6,2,7")[0];
 
-	private int yy_nxt[][] = unpackFromString(3, 5,
-			"-1,1,4:2,2,-1:2,3,-1:7");
+	private int yy_nxt[][] = unpackFromString(8,8,
+"-1,1,11,14,15,2,14,3,-1:2,4,-1:14,7,12,7:2,2,7,3,-1:3,5,-1:7,8,-1:5,7:4,9,7" +
+",3,-1:4,6,-1:3");
 
-	public java_cup.runtime.Symbol next_token()
-			throws java.io.IOException {
+	public java_cup.runtime.Symbol next_token ()
+		throws java.io.IOException {
 		int yy_lookahead;
 		int yy_anchor = YY_NO_ANCHOR;
 		int yy_state = yy_state_dtrans[yy_lexical_state];
@@ -277,23 +266,15 @@ class CoolLexer implements java_cup.runtime.Scanner {
 			yy_next_state = yy_nxt[yy_rmap[yy_state]][yy_cmap[yy_lookahead]];
 			if (YY_EOF == yy_lookahead && true == yy_initial) {
 
-/*  Stuff enclosed in %eofval{ %eofval} specifies java code that is
- *  executed when end-of-file is reached.  If you use multiple lexical
- *  states and want to do something special if an EOF is encountered in
- *  one of those states, place your code in the switch statement.
- *  Ultimately, you should return the EOF symbol, or your lexer won't
- *  work.  */
-				switch (yy_lexical_state) {
-					case YYINITIAL:
-	/* nothing special to do in the initial state */
-						break;
-	/* If necessary, add code for other states here, e.g:
-	   case COMMENT:
-	   ...
-	   break;
-	*/
-				}
-				return new Symbol(TokenConstants.EOF);
+    switch(yy_lexical_state) {
+    case YYINITIAL:
+	    break;
+    case COMMENT:
+    case SINGLE_LINE_COMMENT:
+	    yybegin(YYINITIAL);
+	    return new Symbol(TokenConstants.ERROR, "EOF in comment");
+    }
+    return new Symbol(TokenConstants.EOF);
 			}
 			if (YY_F != yy_next_state) {
 				yy_state = yy_next_state;
@@ -303,46 +284,73 @@ class CoolLexer implements java_cup.runtime.Scanner {
 					yy_last_accept_state = yy_state;
 					yy_mark_end();
 				}
-			} else {
+			}
+			else {
 				if (YY_NO_STATE == yy_last_accept_state) {
 					throw (new Error("Lexical Error: Unmatched Input."));
-				} else {
+				}
+				else {
 					yy_anchor = yy_acpt[yy_last_accept_state];
 					if (0 != (YY_END & yy_anchor)) {
 						yy_move_end();
 					}
 					yy_to_mark();
 					switch (yy_last_accept_state) {
-						case 1: { /* This rule should be the very last
-									 in your lexical specification and
-                                     will match match everything not
-                                     matched by other lexical rules. */
-							System.err.println("LEXER BUG - UNMATCHED: " + yytext());
-						}
-						case -2:
-							break;
-						case 2:
-
-						case -3:
-							break;
-						case 3: { /* Sample lexical rule for "=>" arrow.
-                                     Further lexical rules should be defined
-                                     here, after the last %% separator */
-							return new Symbol(TokenConstants.DARROW);
-						}
-						case -4:
-							break;
-						case 4: { /* This rule should be the very last
-                                     in your lexical specification and
-                                     will match match everything not
-                                     matched by other lexical rules. */
-							System.err.println("LEXER BUG - UNMATCHED: " + yytext());
-						}
-						case -5:
-							break;
-						default:
-							yy_error(YY_E_INTERNAL, false);
-						case -1:
+					case 1:
+						{ return new Symbol(STR_CONST, addString(yytext())); }
+					case -2:
+						break;
+					case 2:
+						{ curr_lineno++; }
+					case -3:
+						break;
+					case 3:
+						
+					case -4:
+						break;
+					case 4:
+						{ yybegin(COMMENT); }
+					case -5:
+						break;
+					case 5:
+						{ return new Symbol(TokenConstants.ERROR, "Unmatched *)"); }
+					case -6:
+						break;
+					case 6:
+						{ yybegin(SINGLE_LINE_COMMENT); }
+					case -7:
+						break;
+					case 7:
+						{}
+					case -8:
+						break;
+					case 8:
+						{ yybegin(YYINITIAL);}
+					case -9:
+						break;
+					case 9:
+						{ yybegin(YYINITIAL); }
+					case -10:
+						break;
+					case 11:
+						{ return new Symbol(STR_CONST, addString(yytext())); }
+					case -11:
+						break;
+					case 12:
+						{}
+					case -12:
+						break;
+					case 14:
+						{ return new Symbol(STR_CONST, addString(yytext())); }
+					case -13:
+						break;
+					case 15:
+						{ return new Symbol(STR_CONST, addString(yytext())); }
+					case -14:
+						break;
+					default:
+						yy_error(YY_E_INTERNAL,false);
+					case -1:
 					}
 					yy_initial = true;
 					yy_state = yy_state_dtrans[yy_lexical_state];
