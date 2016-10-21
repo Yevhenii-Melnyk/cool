@@ -36,7 +36,7 @@ class Lexer {
 	public static void main(String[] args) {
 		args = Flags.handleFlags(args);
 		if (args.length == 0)
-			args = new String[]{Lexer.class.getClassLoader().getResource("test.cl").getPath()};
+			args = new String[]{Lexer.class.getClassLoader().getResource("lineno3.cool").getPath()};
 
 		for (int i = 0; i < args.length; i++) {
 			FileReader file = null;
